@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>nl.blauwe-lucht</groupId>
+  <artifactId>libfibonacci</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <!-- Disable default JAR packaging -->
+  <packaging>pom</packaging>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+
+          <execution>
+            <id>mkdir-target</id>
+            <phase>initialize</phase>
+            <goals><goal>exec</goal></goals>
+            <configuration>
+              <executable>sh</executable>
+              <arguments>
+                <argument>-c</argument>
+                <argument>mkdir -p ${project.build.directory}</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>compile-cpp</id>
+            <phase>compile</phase>
+            <goals><goal>exec</goal></goals>
+            <configuration>
+              <executable>g++</executable>
+              <arguments>
+                <argument>-c</argument>
+                <argument>src/Fibonacci.cpp</argument>
+                <argument>-o</argument>
+                <argument>target/Fibonacci.o</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>link-test</id>
+            <phase>test-compile</phase>
+            <goals><goal>exec</goal></goals>
+            <configuration>
+              <executable>g++</executable>
+              <arguments>
+                <argument>test/FibonacciTests.cpp</argument>
+                <argument>target/Fibonacci.o</argument>
+                <argument>-I</argument>
+                <argument>src</argument>
+                <argument>-lgtest</argument>
+                <argument>-lgtest_main</argument>
+                <argument>-pthread</argument>
+                <argument>-o</argument>
+                <argument>target/fibtest</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>run-tests</id>
+            <phase>test</phase>
+            <goals><goal>exec</goal></goals>
+            <configuration>
+              <executable>${project.basedir}/target/fibtest</executable>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

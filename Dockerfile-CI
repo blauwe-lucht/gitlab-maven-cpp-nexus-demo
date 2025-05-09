@@ -1,0 +1,17 @@
+FROM maven:3.9.9-eclipse-temurin-24
+
+# Install build tools and cmake
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        g++ \
+        cmake \
+        git \
+        build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Build and install Google Test
+RUN git clone --depth=1 https://github.com/google/googletest.git /tmp/googletest && \
+    cd /tmp/googletest && \
+    cmake -S . -B build && \
+    cmake --build build --target install && \
+    rm -rf /tmp/googletest
