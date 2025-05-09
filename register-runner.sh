@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Config
+GITLAB_HOST="gitlab.local"
+GITLAB_PORT="8080"
+GITLAB_URL="http://${GITLAB_HOST}:${GITLAB_PORT}/"
+RUNNER_CONTAINER="gitlab-runner"
+DEFAULT_CI_IMAGE="maven:3.9.6-eclipse-temurin-17-alpine"
+DESCRIPTION="docker-runner"
+EXECUTOR="docker"
+
+# Wait for GitLab to be ready
+echo "[INFO] Waiting for GitLab at ${GITLAB_URL}..."
+until docker exec gitlab curl -sSf "http://localhost/-/readiness"; do
+  echo "[INFO] GitLab not ready yet, retrying in 5 seconds..."
+  sleep 5
+done
+
+echo "[INFO] GitLab is up."
+
+# Retrieve the registration token from inside the GitLab container
+echo "[INFO] Retrieving runner registration token from GitLab container..."
+REGISTRATION_TOKEN=$(docker exec gitlab gitlab-rails runner \
+  "puts Gitlab::CurrentSettings.current_application_settings.runners_registration_token" 2>/dev/null | tr -d '\r')
+
+if [[ -z "$REGISTRATION_TOKEN" ]]; then
+  echo "[ERROR] Failed to retrieve registration token."
+  exit 1
+fi
+
+echo "[INFO] Registration token retrieved: ${REGISTRATION_TOKEN:0:4}******"
+
+# Register the GitLab Runner
+echo "[INFO] Registering GitLab Runner..."
+docker exec -i "$RUNNER_CONTAINER" gitlab-runner register --non-interactive \
+  --url "http://gitlab" \
+  --registration-token "$REGISTRATION_TOKEN" \
+  --executor "$EXECUTOR" \
+  --description "$DESCRIPTION" \
+  --docker-image "$DEFAULT_CI_IMAGE" \
+  --docker-privileged
+
+echo "[INFO] Runner registered successfully."
