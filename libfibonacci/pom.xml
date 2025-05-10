@@ -10,6 +10,13 @@
   <!-- Disable default JAR packaging -->
   <packaging>pom</packaging>
 
+  <distributionManagement>
+    <repository>
+      <id>nexus-local</id>
+      <url>http://172.17.0.1:8081/repository/maven-snapshots/</url>
+    </repository>
+  </distributionManagement>
+
   <build>
     <plugins>
       <plugin>
@@ -75,6 +82,43 @@
             </configuration>
           </execution>
 
+          <execution>
+            <id>archive-lib</id>
+            <phase>package</phase>
+            <goals><goal>exec</goal></goals>
+            <configuration>
+              <executable>ar</executable>
+              <arguments>
+                <argument>rcs</argument>
+                <argument>target/libfibonacci.a</argument>
+                <argument>target/Fibonacci.o</argument>
+              </arguments>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
+      <!-- Deploy plugin to upload the .a to Nexus -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>3.1.1</version>
+        <executions>
+          <execution>
+            <id>deploy-static-lib</id>
+            <phase>deploy</phase>
+            <goals><goal>deploy-file</goal></goals>
+            <configuration>
+              <file>${project.build.directory}/libfibonacci.a</file>
+              <groupId>nl.blauwe-lucht</groupId>
+              <artifactId>libfibonacci</artifactId>
+              <version>1.0-SNAPSHOT</version>
+              <packaging>a</packaging>
+              <url>http://172.17.0.1:8081/repository/maven-snapshots/</url>
+              <repositoryId>nexus-local</repositoryId>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
