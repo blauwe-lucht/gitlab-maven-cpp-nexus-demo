@@ -2,125 +2,151 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>nl.blauwe-lucht</groupId>
-  <artifactId>libfibonacci</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <!-- Disable default JAR packaging -->
-  <packaging>pom</packaging>
+    <groupId>nl.blauwe-lucht</groupId>
+    <artifactId>libfibonacci</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    
+    <!-- Disable default JAR packaging -->
+    <packaging>pom</packaging>
 
-  <distributionManagement>
-    <repository>
-      <id>nexus-local</id>
-      <url>http://172.17.0.1:8081/repository/maven-snapshots/</url>
-    </repository>
-  </distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>nexus-local</id>
+            <url>http://172.17.0.1:8081/repository/maven-snapshots/</url>
+        </repository>
+    </distributionManagement>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>3.1.0</version>
-        <executions>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
 
-          <execution>
-            <id>mkdir-target</id>
-            <phase>initialize</phase>
-            <goals><goal>exec</goal></goals>
-            <configuration>
-              <executable>sh</executable>
-              <arguments>
-                <argument>-c</argument>
-                <argument>mkdir -p ${project.build.directory}</argument>
-              </arguments>
-            </configuration>
-          </execution>
+                    <execution>
+                        <id>mkdir-target</id>
+                        <phase>initialize</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>mkdir -p ${project.build.directory}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
 
-          <execution>
-            <id>compile-cpp</id>
-            <phase>compile</phase>
-            <goals><goal>exec</goal></goals>
-            <configuration>
-              <executable>g++</executable>
-              <arguments>
-                <argument>-c</argument>
-                <argument>src/Fibonacci.cpp</argument>
-                <argument>-o</argument>
-                <argument>target/Fibonacci.o</argument>
-              </arguments>
-            </configuration>
-          </execution>
+                    <execution>
+                        <id>compile-cpp</id>
+                        <phase>compile</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>g++</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>src/Fibonacci.cpp</argument>
+                                <argument>-o</argument>
+                                <argument>target/Fibonacci.o</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
 
-          <execution>
-            <id>link-test</id>
-            <phase>test-compile</phase>
-            <goals><goal>exec</goal></goals>
-            <configuration>
-              <executable>g++</executable>
-              <arguments>
-                <argument>test/FibonacciTests.cpp</argument>
-                <argument>target/Fibonacci.o</argument>
-                <argument>-I</argument>
-                <argument>src</argument>
-                <argument>-lgtest</argument>
-                <argument>-lgtest_main</argument>
-                <argument>-pthread</argument>
-                <argument>-o</argument>
-                <argument>target/fibtest</argument>
-              </arguments>
-            </configuration>
-          </execution>
+                    <execution>
+                        <id>link-test</id>
+                        <phase>test-compile</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>g++</executable>
+                            <arguments>
+                                <argument>test/FibonacciTests.cpp</argument>
+                                <argument>target/Fibonacci.o</argument>
+                                <argument>-I</argument>
+                                <argument>src</argument>
+                                <argument>-lgtest</argument>
+                                <argument>-lgtest_main</argument>
+                                <argument>-pthread</argument>
+                                <argument>-o</argument>
+                                <argument>target/fibtest</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
 
-          <execution>
-            <id>run-tests</id>
-            <phase>test</phase>
-            <goals><goal>exec</goal></goals>
-            <configuration>
-              <executable>${project.basedir}/target/fibtest</executable>
-            </configuration>
-          </execution>
+                    <execution>
+                        <id>run-tests</id>
+                        <phase>test</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>${project.basedir}/target/fibtest</executable>
+                        </configuration>
+                    </execution>
 
-          <execution>
-            <id>archive-lib</id>
-            <phase>package</phase>
-            <goals><goal>exec</goal></goals>
-            <configuration>
-              <executable>ar</executable>
-              <arguments>
-                <argument>rcs</argument>
-                <argument>target/libfibonacci.a</argument>
-                <argument>target/Fibonacci.o</argument>
-              </arguments>
-            </configuration>
-          </execution>
+                    <execution>
+                        <id>archive-lib</id>
+                        <phase>package</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>ar</executable>
+                            <arguments>
+                                <argument>rcs</argument>
+                                <argument>target/libfibonacci.a</argument>
+                                <argument>target/Fibonacci.o</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
 
-        </executions>
-      </plugin>
+                    <execution>
+                        <id>package-tarball</id>
+                        <phase>package</phase>
+                        <goals><goal>exec</goal></goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <arguments>
+                                <argument>-c</argument>
+                                <argument>
+                                    mkdir -p target/package/include target/package/lib &amp;&amp;
+                                    cp src/Fibonacci.h target/package/include/ &amp;&amp;
+                                    cp target/libfibonacci.a target/package/lib/ &amp;&amp;
+                                    tar -czf target/libfibonacci.tar.gz -C target/package .
+                                </argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
 
-      <!-- Deploy plugin to upload the .a to Nexus -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>3.1.1</version>
-        <executions>
-          <execution>
-            <id>deploy-static-lib</id>
-            <phase>deploy</phase>
-            <goals><goal>deploy-file</goal></goals>
-            <configuration>
-              <file>${project.build.directory}/libfibonacci.a</file>
-              <groupId>nl.blauwe-lucht</groupId>
-              <artifactId>libfibonacci</artifactId>
-              <version>1.0-SNAPSHOT</version>
-              <packaging>a</packaging>
-              <url>http://172.17.0.1:8081/repository/maven-snapshots/</url>
-              <repositoryId>nexus-local</repositoryId>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+                </executions>
+            </plugin>
+
+            <!-- Deploy the tar.gz to Nexus -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <!-- Disable the default deploy execution, since we're only needing the tar.gz deploy -->
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>none</phase>
+                    </execution>
+            
+                    <execution>
+                        <id>deploy-archive</id>
+                        <phase>deploy</phase>
+                        <goals><goal>deploy-file</goal></goals>
+                        <configuration>
+                            <file>${project.build.directory}/libfibonacci.tar.gz</file>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                            <packaging>tar.gz</packaging>
+                            <repositoryId>nexus-local</repositoryId>
+                            <url>http://172.17.0.1:8081/repository/maven-snapshots/</url>
+                            <generatePom>true</generatePom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
