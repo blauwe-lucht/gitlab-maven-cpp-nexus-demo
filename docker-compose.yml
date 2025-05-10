@@ -2,16 +2,25 @@
 services:
   gitlab:
     image: gitlab/gitlab-ce:17.11.2-ce.0
-    hostname: gitlab.local
+    hostname: ${GITLAB_HOST}
     container_name: gitlab
     restart: unless-stopped
     ports:
-      - "8080:80"
+      # nginx['listen_port'] = 80 should have worked according to
+      # https://docs.gitlab.com/omnibus/settings/nginx/#set-the-nginx-listen-port
+      # but it seems to be ignored, so we need to set the port here.
+      - "${GITLAB_PORT}:${GITLAB_PORT}"
     environment:
-      GITLAB_ROOT_EMAIL: "admin@gitlab.local"
+      GITLAB_ROOT_EMAIL: "admin@${GITLAB_HOST}"
       GITLAB_ROOT_PASSWORD: "Abcd1234!"
+      # Set external_url to the correct port so all links will be correct (for example link to runner) &
+      # disable cluster mode to avoid more memory usage
+      # (https://docs.gitlab.com/administration/operations/puma/#disable-puma-clustered-mode-in-memory-constrained-environments) &
+      # let puma listen on non-default port (which happens to be the same as our external_url port):
       GITLAB_OMNIBUS_CONFIG: |
-        puma['worker_processes'] = 0 # disable cluster mode to avoid more memory usage
+        external_url 'http://${GITLAB_HOST}:${GITLAB_PORT}'
+        puma['worker_processes'] = 0
+        puma['port'] = 8081
     volumes:
       - gitlab_config:/etc/gitlab
       - gitlab_logs:/var/log/gitlab
@@ -29,14 +38,14 @@ services:
     entrypoint: >
       gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
 
-  # nexus:
-  #   image: sonatype/nexus3:3.79.1-java17-alpine
-  #   container_name: nexus
-  #   restart: unless-stopped
-  #   ports:
-  #     - "8081:8081"
-  #   volumes:
-  #     - nexus_data:/nexus-data
+  nexus:
+    image: sonatype/nexus3:3.79.1-java17-alpine
+    container_name: nexus
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus_data:/nexus-data
 
 volumes:
   gitlab_config:
