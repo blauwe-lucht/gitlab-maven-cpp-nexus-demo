@@ -1,0 +1,33 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <mirrors>
+        <!-- Disable the default HTTP blocker -->
+        <mirror>
+            <id>nexus</id>
+            <mirrorOf>external:http:*</mirrorOf>
+            <name>Disable HTTP Blocker</name>
+            <url>http://172.17.0.1:8081/repository/maven-releases/</url>
+        </mirror>
+    </mirrors>
+
+    <profiles>
+        <profile>
+            <id>allow-http</id>
+            <repositories>
+                <repository>
+                    <id>nexus-local</id>
+                    <url>http://172.17.0.1:8081/repository/maven-releases/</url>
+                    <releases><enabled>true</enabled></releases>
+                    <snapshots><enabled>false</enabled></snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+    <activeProfiles>
+        <activeProfile>allow-http</activeProfile>
+    </activeProfiles>
+</settings>

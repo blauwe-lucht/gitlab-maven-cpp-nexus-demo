@@ -13,6 +13,9 @@ ROLE_PRIVILEGES=(
     "nx-repository-view-maven2-maven-snapshots-add"
     "nx-repository-view-maven2-maven-snapshots-edit"
     "nx-repository-view-maven2-maven-snapshots-read"
+    "nx-repository-view-maven2-maven-releases-add"
+    "nx-repository-view-maven2-maven-releases-edit"
+    "nx-repository-view-maven2-maven-releases-read"
 )
 
 # === Utilities ===
