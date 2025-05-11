@@ -12,22 +12,4 @@
             <url>http://172.17.0.1:8081/repository/maven-releases/</url>
         </mirror>
     </mirrors>
-
-    <profiles>
-        <profile>
-            <id>allow-http</id>
-            <repositories>
-                <repository>
-                    <id>nexus-local</id>
-                    <url>http://172.17.0.1:8081/repository/maven-releases/</url>
-                    <releases><enabled>true</enabled></releases>
-                    <snapshots><enabled>false</enabled></snapshots>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
-
-    <activeProfiles>
-        <activeProfile>allow-http</activeProfile>
-    </activeProfiles>
 </settings>
