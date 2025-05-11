@@ -47,6 +47,16 @@ services:
     volumes:
       - nexus_data:/nexus-data
 
+  test-server:
+    image: ubuntu:22.04
+    container_name: test-server
+    command: tail -f /dev/null
+
+  acceptance-server:
+    image: ubuntu:22.04
+    container_name: acceptance-server
+    command: tail -f /dev/null
+
 volumes:
   gitlab_config:
   gitlab_logs:
