@@ -7,7 +7,8 @@ RUN apt-get update && \
         cmake \
         git \
         build-essential \
-    && rm -rf /var/lib/apt/lists/*
+        docker.io && \
+    rm -rf /var/lib/apt/lists/*
 
 # Build and install Google Test
 RUN git clone --depth=1 https://github.com/google/googletest.git /tmp/googletest && \
