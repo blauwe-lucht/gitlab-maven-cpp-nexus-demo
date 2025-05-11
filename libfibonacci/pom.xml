@@ -6,7 +6,7 @@
 
     <groupId>nl.blauwe-lucht</groupId>
     <artifactId>libfibonacci</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>nar</packaging>
 
     <name>libfibonacci</name>
@@ -53,7 +53,7 @@
                             <executable>g++</executable>
                             <arguments>
                                 <argument>test/FibonacciTests.cpp</argument>
-                                <argument>src/main/Fibonacci.cpp</argument>
+                                <argument>src/main/cpp/Fibonacci.cpp</argument>
                                 <argument>-I</argument>
                                 <argument>src/main/include</argument>
                                 <argument>-lgtest</argument>
