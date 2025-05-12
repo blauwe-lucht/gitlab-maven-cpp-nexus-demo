@@ -7,7 +7,9 @@ RUN apt-get update && \
         cmake \
         git \
         build-essential \
-        docker.io && \
+        docker.io \
+        python3 \
+        unzip && \
     rm -rf /var/lib/apt/lists/*
 
 # Build and install Google Test

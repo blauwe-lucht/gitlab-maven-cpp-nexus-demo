@@ -45,7 +45,7 @@ docker exec -i "$RUNNER_CONTAINER" gitlab-runner register --non-interactive \
   --description "$DESCRIPTION" \
   --docker-image "$DEFAULT_CI_IMAGE" \
   --docker-pull-policy "if-not-present" \
-  --docker-extra-hosts "gitlab.local:host-gateway" \
+  --docker-extra-hosts "gitlab.local:host-gateway,nexus.local:host-gateway" \
   --docker-volumes "/cache" \
   --docker-volumes "/root/.m2"
 
