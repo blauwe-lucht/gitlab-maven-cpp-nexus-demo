@@ -1,13 +1,23 @@
 image: maven-cpp:latest
 
 stages:
+  - extract
   - build
   - upload
   - deploy_to_test
+  - release
   - deploy_to_acceptance
 
 variables:
   MAVEN_CLI_OPTS: "-B -e -V --settings ./maven-settings.xml"
+
+extract_version:
+  stage: extract
+  script:
+    - echo "VERSION=$(mvn help:evaluate -q -DforceStdout -Dexpression=project.version)" > version.env
+  artifacts:
+    reports:
+      dotenv: version.env
 
 build:
   stage: build
@@ -33,6 +43,18 @@ deploy_to_test:
     - main
   dependencies:
     - build
+
+create_release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  only:
+    - main
+  needs:
+    - job: extract_version
+  release:
+    tag_name: "$VERSION"
+    name: 'Fibonacci release $VERSION'
+    description: 'Release of Fibonacci command line application'
 
 deploy_to_acceptance:
   stage: deploy_to_acceptance
