@@ -4,6 +4,7 @@ stages:
   - build
   - upload
   - deploy_to_test
+  - deploy_to_acceptance
 
 variables:
   MAVEN_CLI_OPTS: "-B -e -V --settings ./maven-settings.xml"
@@ -30,3 +31,13 @@ deploy_to_test:
     - main
   dependencies:
     - build
+
+deploy_to_acceptance:
+  stage: deploy_to_acceptance
+  script:
+    - python3 deploy-to.py acceptance
+  only:
+    - main
+  when: manual
+  needs:
+    - deploy_to_test
