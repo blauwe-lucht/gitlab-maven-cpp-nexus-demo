@@ -1,1 +1,5 @@
+# Ignore Maven artifacts
 target
+
+# Ignore intermediate files for working with GitLab
+_gitlab_push/

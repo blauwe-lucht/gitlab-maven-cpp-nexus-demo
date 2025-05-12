@@ -9,9 +9,9 @@ source "$SCRIPT_DIR/.env"
 GITLAB_URL="http://${GITLAB_HOST}:${GITLAB_PORT}/"
 GITLAB_API_URL="${GITLAB_URL}api/v4/"
 GITLAB_CONTAINER="gitlab"
-GITLAB_TOKEN_NAME="demo-token"
-GITLAB_TOKEN="gptdemo1234567890abcdef1234567890abcdefabcd"
-SCOPES=("api" "read_repository")
+GITLAB_PAT_NAME="demo-token"
+GITLAB_PAT="gptdemo1234567890abcdef1234567890abcdefabcd"
+SCOPES=("api" "read_repository" "write_repository")
 SKIP_PAT=false
 
 log_info() {
@@ -48,16 +48,31 @@ wait_for_gitlab_to_be_ready() {
 ensure_pat() {
     log_info "Ensuring personal access token is present (this may take a while)..."
     docker exec "$GITLAB_CONTAINER" gitlab-rails runner -e production "
-        name = '$GITLAB_TOKEN_NAME'
+        name = '$GITLAB_PAT_NAME'
         scopes = %w(${SCOPES[*]})
+        token_value = '${GITLAB_PAT}'
         user = User.find_by_username('root')
-        token = user.personal_access_tokens.find_by(name: name, revoked: false)
 
-        if token.nil?
-            token = user.personal_access_tokens.create!(name: name, scopes: scopes, expires_at: 1.years.from_now)
-            token.set_token('${GITLAB_TOKEN}')
-            token.save!
+        existing_tokens = user.personal_access_tokens.where(name: name)
+
+        # Revoke and destroy conflicting tokens if the same value was used before
+        existing_tokens.each do |t|
+          if t.revoked? || t.expired?
+            t.destroy
+          else
+            puts 'Found existing PAT.'
+            exit
+          end
         end
+
+        token = user.personal_access_tokens.create!(
+          name: name,
+          scopes: scopes,
+          expires_at: 1.year.from_now
+        )
+        token.set_token(token_value)
+        token.save!
+        puts 'Token created successfully.'
     "
 }
 
@@ -65,7 +80,7 @@ call_gitlab_api() {
     local method="$1"
     local endpoint="$2"
     local data="${3:-}"
-    local curl_args=(-s -f -H "PRIVATE-TOKEN: ${GITLAB_TOKEN}" -H "Content-Type: application/json" -X "$method")
+    local curl_args=(-s -f -H "PRIVATE-TOKEN: ${GITLAB_PAT}" -H "Content-Type: application/json" -X "$method")
 
     if [[ -n "$data" ]]; then
         curl_args+=(-d "$data")
@@ -97,6 +112,36 @@ ensure_gitlab_project() {
     fi
 }
 
+prepare_and_push_subdir_repo() {
+    local subdir="$1"
+    local project="$2"
+    local stage_dir="${SCRIPT_DIR}/_gitlab_push/${project}"
+    local remote_url="http://root:${GITLAB_PAT}@${GITLAB_HOST}:${GITLAB_PORT}/root/${project}.git"
+
+    log_info "Preparing subdir '$subdir' for GitLab push to '$project'..."
+
+    mkdir -p "$(dirname "$stage_dir")"
+
+    # Create or update standalone repo
+    git -C "$SCRIPT_DIR" subtree split --prefix="$subdir" -b "tmp-$project"
+    rm -rf "$stage_dir"
+    git clone --single-branch --branch "tmp-$project" "$SCRIPT_DIR" "$stage_dir"
+    git -C "$stage_dir" checkout -b main
+    git -C "$SCRIPT_DIR" branch -D "tmp-$project"
+
+    (
+        cd "$stage_dir"
+
+        if ! git remote | grep -q gitlab; then
+            git remote add gitlab "$remote_url"
+        else
+            git remote set-url gitlab "$remote_url"
+        fi
+
+        git push gitlab main --force
+    )
+}
+
 parse_flags "$@"
 wait_for_gitlab_to_be_ready
 if [[ "$SKIP_PAT" == false ]]; then
@@ -105,4 +150,6 @@ else
     log_info "Skipping personal access token creation."
 fi
 ensure_gitlab_project "libfibonacci"
+prepare_and_push_subdir_repo "libfibonacci" "libfibonacci"
 ensure_gitlab_project "fibonacci"
+prepare_and_push_subdir_repo "fibonacci" "fibonacci"
