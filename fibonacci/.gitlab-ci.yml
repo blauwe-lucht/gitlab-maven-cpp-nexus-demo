@@ -41,3 +41,4 @@ deploy_to_acceptance:
   when: manual
   needs:
     - deploy_to_test
+  allow_failure: false
