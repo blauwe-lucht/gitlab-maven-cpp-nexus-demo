@@ -35,6 +35,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - gitlab_runner_config:/etc/gitlab-runner
+    # The extra_hosts make sure that we can access GitLab from the runner and the host using the same hostname.
+    extra_hosts:
+      - "gitlab.local:host-gateway"
     entrypoint: >
       gitlab-runner run --user=gitlab-runner --working-directory=/home/gitlab-runner
 

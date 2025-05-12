@@ -39,6 +39,8 @@ docker exec -i "$RUNNER_CONTAINER" gitlab-runner register --non-interactive \
   --executor "$EXECUTOR" \
   --description "$DESCRIPTION" \
   --docker-image "$DEFAULT_CI_IMAGE" \
+  --docker-pull-policy "if-not-present" \
+  --docker-extra-hosts "gitlab.local:host-gateway" \
   --docker-privileged
 
 echo "[INFO] Runner registered successfully."
