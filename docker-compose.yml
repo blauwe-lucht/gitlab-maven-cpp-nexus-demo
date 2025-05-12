@@ -26,7 +26,7 @@ services:
       - gitlab_logs:/var/log/gitlab
       - gitlab_data:/var/opt/gitlab
 
-  gitlab_runner:
+  gitlab-runner:
     image: gitlab/gitlab-runner:v17.11.1
     container_name: gitlab-runner
     depends_on:
