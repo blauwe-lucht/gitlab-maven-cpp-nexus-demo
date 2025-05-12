@@ -3,6 +3,7 @@ image: maven-cpp:latest
 stages:
   - build
   - upload
+  - deploy_to_test
 
 variables:
   MAVEN_CLI_OPTS: "-B -e -V --settings ./maven-settings.xml"
@@ -16,6 +17,15 @@ upload:
   stage: upload
   script:
     - mvn $MAVEN_CLI_OPTS deploy
+  only:
+    - main
+  dependencies:
+    - build
+
+deploy_to_test:
+  stage: deploy
+  script:
+    - python3 deploy-to.py test
   only:
     - main
   dependencies:
