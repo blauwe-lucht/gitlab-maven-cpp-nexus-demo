@@ -17,6 +17,9 @@ test:
   stage: test
   script:
     - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    reports:
+      junit: fibonacci/target/test-results.xml
 
 deploy:
   stage: deploy
