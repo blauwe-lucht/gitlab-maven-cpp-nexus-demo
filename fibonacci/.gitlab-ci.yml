@@ -23,7 +23,7 @@ upload:
     - build
 
 deploy_to_test:
-  stage: deploy
+  stage: deploy_to_test
   script:
     - python3 deploy-to.py test
   only:
