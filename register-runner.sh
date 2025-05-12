@@ -36,6 +36,7 @@ echo "[INFO] Registering GitLab Runner..."
 # --docker-pull-policy "if-not-present": Needed to be able to use local images.
 # --docker-extra-hosts "gitlab.local:host-gateway": Needed to be able to use the same hostname
 #   from within the container and from the host.
+# --docker-volumes "/var/run/docker.sock:/var/run/docker.sock": Needed to be able to docker cp files to the test and acceptance containers.
 # --docker-volumes "/cache": Needed for GitLab pipeline caching.
 # --docker-volumes "/root/.m2": Needed to greatly reduce Maven downloading.
 docker exec -i "$RUNNER_CONTAINER" gitlab-runner register --non-interactive \
@@ -47,6 +48,7 @@ docker exec -i "$RUNNER_CONTAINER" gitlab-runner register --non-interactive \
   --docker-pull-policy "if-not-present" \
   --docker-extra-hosts "gitlab.local:host-gateway" \
   --docker-extra-hosts "nexus.local:host-gateway" \
+  --docker-volumes "/var/run/docker.sock:/var/run/docker.sock" \
   --docker-volumes "/cache" \
   --docker-volumes "/root/.m2"
 
