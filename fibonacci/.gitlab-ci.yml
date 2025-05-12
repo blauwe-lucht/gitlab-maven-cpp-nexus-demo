@@ -2,6 +2,7 @@ image: maven-cpp:latest
 
 stages:
   - build
+  - upload
 
 variables:
   MAVEN_CLI_OPTS: "-B -e -V --settings ./maven-settings.xml"
@@ -10,3 +11,12 @@ build:
   stage: build
   script:
     - mvn $MAVEN_CLI_OPTS compile
+
+upload:
+  stage: upload
+  script:
+    - mvn $MAVEN_CLI_OPTS deploy
+  only:
+    - main
+  dependencies:
+    - build
