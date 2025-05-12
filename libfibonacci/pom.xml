@@ -73,7 +73,10 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>${project.basedir}/target/fibtest --gtest_output=xml:${project.basedir}/target/test-results.xml</executable>
+                            <executable>${project.basedir}/target/fibtest</executable>
+                            <arguments>
+                                <argument>--gtest_output=xml:${project.basedir}/target/test-results.xml</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
