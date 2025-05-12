@@ -2,8 +2,9 @@
 set -euo pipefail
 
 # === Configuration ===
-NEXUS_HOST="localhost"
-NEXUS_PORT="8081"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/.env"
+
 NEXUS_URL="http://${NEXUS_HOST}:${NEXUS_PORT}"
 DEFAULT_PASSWORD="Abcd1234!"
 ROLE_ID="anonymous-deploy"
