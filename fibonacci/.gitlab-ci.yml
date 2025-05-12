@@ -25,6 +25,8 @@ upload:
 
 deploy_to_test:
   stage: deploy_to_test
+  environment:
+    name: test
   script:
     - python3 deploy-to.py test
   only:
@@ -34,6 +36,8 @@ deploy_to_test:
 
 deploy_to_acceptance:
   stage: deploy_to_acceptance
+  environment:
+    name: acceptance
   script:
     - python3 deploy-to.py acceptance
   only:
