@@ -51,10 +51,13 @@ create_release:
     - main
   needs:
     - job: extract_version
-  release:
-    tag_name: "$VERSION"
-    name: 'Fibonacci release $VERSION'
-    description: 'Release of Fibonacci command line application'
+  script:
+    - |
+      release-cli create \
+        --name "Fibonacci release $VERSION" \
+        --tag-name "$VERSION" \
+        --description "Release of Fibonacci command line application" \
+        --ref "$CI_COMMIT_SHA"
 
 deploy_to_acceptance:
   stage: deploy_to_acceptance
