@@ -20,14 +20,27 @@ log_error() {
     echo "[ERROR] $*" >&2
 }
 
+call_nexus_api() {
+    local method="$1"
+    local endpoint="$2"
+    local data="${3:-}"
+    local curl_args=(-s -f -u "${NEXUS_ADMIN_USER}:${NEXUS_ADMIN_PASSWORD}" -H "Content-Type: application/json" -X "$method")
+
+    if [[ -n "$data" ]]; then
+        curl_args+=(-d "$data")
+    fi
+
+    curl "${curl_args[@]}" "${NEXUS_URL}${endpoint}"
+}
+
 delete_component_by_id() {
     local component_id="$1"
 
-    curl -sf -u "$NEXUS_ADMIN_USER:$NEXUS_ADMIN_PASSWORD" \
-        -X DELETE \
-        "$NEXUS_URL/service/rest/v1/components/$component_id" \
-        && log_info "Deleted component ID $component_id" \
-        || log_error "Failed to delete component ID $component_id"
+    if call_nexus_api DELETE "/service/rest/v1/components/${component_id}"; then
+        log_info "Deleted component ID $component_id"
+    else
+        log_error "Failed to delete component ID $component_id"
+    fi
 }
 
 delete_all_versions_of_artifact() {
@@ -38,13 +51,13 @@ delete_all_versions_of_artifact() {
     log_info "Searching for components of '$artifact'..."
 
     while :; do
-        query_url="$NEXUS_URL/service/rest/v1/components?repository=$REPOSITORY&group=$GROUP&name=$artifact"
+        query_url="/service/rest/v1/components?repository=${REPOSITORY}&group=${GROUP}&name=${artifact}"
 
         if [[ -n "$continuation_token" ]]; then
-            query_url+="&continuationToken=$continuation_token"
+            query_url+="&continuationToken=${continuation_token}"
         fi
 
-        response=$(curl -sf -u "$NEXUS_ADMIN_USER:$NEXUS_ADMIN_PASSWORD" "$query_url")
+        response=$(call_nexus_api GET "$query_url" || echo "")
 
         component_ids=($(echo "$response" | jq -r '.items[].id'))
 
