@@ -6,7 +6,7 @@
 
     <groupId>nl.blauwe-lucht</groupId>
     <artifactId>fibonacci</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>nar</packaging>
 
     <name>fibonacci</name>
@@ -45,6 +45,11 @@
                 <version>3.10.1</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <cpp>
+                        <defines>
+                            <define>APP_VERSION="${project.version}"</define>
+                        </defines>
+                    </cpp>
                     <libraries>
                         <library>
                             <type>executable</type>

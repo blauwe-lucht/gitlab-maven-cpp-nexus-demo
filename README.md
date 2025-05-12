@@ -41,8 +41,6 @@ Log in to Nexus:
 
 ## TODO
 
-- automatically deploy fibonacci binary to test-server
-- show version number of fibonacci cmdline application somehow
 - deploy fibonacci binary to application-server after manual approval
 - Make a setup script that executes all required steps.
 - Don't use registration token, but the new OAuth token.
