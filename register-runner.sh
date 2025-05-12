@@ -33,14 +33,20 @@ fi
 echo "[INFO] Registration token retrieved: ${REGISTRATION_TOKEN}"
 
 echo "[INFO] Registering GitLab Runner..."
+# --docker-pull-policy "if-not-present": Needed to be able to use local images.
+# --docker-extra-hosts "gitlab.local:host-gateway": Needed to be able to use the same hostname
+#   from within the container and from the host.
+# --docker-volumes "/cache": Needed for GitLab pipeline caching.
+# --docker-volumes "/root/.m2": Needed to greatly reduce Maven downloading.
 docker exec -i "$RUNNER_CONTAINER" gitlab-runner register --non-interactive \
-  --url "http://gitlab:${GITLAB_PORT}" \
+  --url "http://gitlab.local:${GITLAB_PORT}" \
   --registration-token "$REGISTRATION_TOKEN" \
   --executor "$EXECUTOR" \
   --description "$DESCRIPTION" \
   --docker-image "$DEFAULT_CI_IMAGE" \
   --docker-pull-policy "if-not-present" \
   --docker-extra-hosts "gitlab.local:host-gateway" \
-  --docker-privileged
+  --docker-volumes "/cache" \
+  --docker-volumes "/root/.m2"
 
 echo "[INFO] Runner registered successfully."
