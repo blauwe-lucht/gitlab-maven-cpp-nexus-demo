@@ -56,9 +56,7 @@ create_gitlab_release:
     - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_BRANCH == "main"'
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   dependencies:
-    - upload
-  needs:
-    - job: extract_version_from_pom
+    - extract_version_from_pom
   script:
     - |
       release-cli create \
@@ -69,12 +67,8 @@ create_gitlab_release:
 
 trigger_deploy:
   stage: trigger_deploy
-  needs:
-    - create_release
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
-      when: on_success
-    - when: never
   trigger:
     project: $CI_PROJECT_PATH
     branch: "$VERSION"
