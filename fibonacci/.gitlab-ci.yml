@@ -1,18 +1,35 @@
+# This pipeline has the following main parts:
+# - build
+# - upload to Nexus
+# - deploy to test environment (automatically)
+# - deploy to acceptance environment (manually)
+# We also want to see which environment has which version deployed.
+# This can only be done using GitLab releases.
+# To make this work we have to use some GitLab tricks:
+# - only run build and upload when the build is not triggered by a tag
+# - only upload to Nexus when the build is triggered by a commit to the main branch (we don't want official packages to come from other than main)
+# - after upload create a release that will set the tag to the version in the pom.xml
+# - trigger a child pipeline that will only execute the deploy stages
+# The child pipeline is exactly the same pipeline, but triggered by a tag. Hence all the rules that check for $CI_COMMIT_TAG.
+
 image: maven-cpp:latest
 
 stages:
-  - extract
+  - extract_version_from_pom
   - build
-  - upload
+  - upload_to_nexus
+  - create_gitlab_release
+  - trigger_deploy
   - deploy_to_test
-  - release
   - deploy_to_acceptance
 
 variables:
   MAVEN_CLI_OPTS: "-B -e -V --settings ./maven-settings.xml"
 
-extract_version:
-  stage: extract
+extract_version_from_pom:
+  stage: extract_version_from_pom
+  rules:
+    - if: '$CI_COMMIT_TAG == null'
   script:
     - echo "VERSION=$(mvn help:evaluate -q -DforceStdout -Dexpression=project.version)" > version.env
   artifacts:
@@ -21,36 +38,29 @@ extract_version:
 
 build:
   stage: build
+  rules:
+    - if: '$CI_COMMIT_TAG == null'
   script:
     - mvn $MAVEN_CLI_OPTS compile
 
-upload:
-  stage: upload
+upload_to_nexus:
+  stage: upload_to_nexus
+  rules:
+    - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_BRANCH == "main"'
   script:
     - mvn $MAVEN_CLI_OPTS deploy
   only:
     - main
-  dependencies:
-    - build
 
-deploy_to_test:
-  stage: deploy_to_test
-  environment:
-    name: test
-  script:
-    - python3 deploy-to.py test
-  only:
-    - main
-  dependencies:
-    - build
-
-create_release:
-  stage: release
+create_gitlab_release:
+  stage: create_gitlab_release
+  rules:
+    - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_BRANCH == "main"'
   image: registry.gitlab.com/gitlab-org/release-cli:latest
-  only:
-    - main
+  dependencies:
+    - upload
   needs:
-    - job: extract_version
+    - job: extract_version_from_pom
   script:
     - |
       release-cli create \
@@ -59,15 +69,34 @@ create_release:
         --description "Release of Fibonacci command line application" \
         --ref "$CI_COMMIT_SHA"
 
+trigger_deploy:
+  stage: trigger_deploy
+  needs:
+    - create_release
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+      when: on_success
+    - when: never
+  trigger:
+    project: $CI_PROJECT_PATH
+    branch: "$VERSION"
+    strategy: depend
+
+deploy_to_test:
+  stage: deploy_to_test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG'
+  environment:
+    name: test
+  script:
+    - python3 deploy-to.py test
+
 deploy_to_acceptance:
   stage: deploy_to_acceptance
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG'
+  when: manual
   environment:
     name: acceptance
   script:
     - python3 deploy-to.py acceptance
-  only:
-    - main
-  when: manual
-  needs:
-    - deploy_to_test
-  allow_failure: false
