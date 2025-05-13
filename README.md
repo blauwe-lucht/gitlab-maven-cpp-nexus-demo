@@ -41,7 +41,7 @@ Log in to Nexus:
 
 ## TODO
 
-- deploy fibonacci binary to application-server after manual approval
 - Make a setup script that executes all required steps.
 - Don't use registration token, but the new OAuth token.
 - Try to get maven-snapshots to work.
+- Only allow specific users to deploy to acceptance. (this is currently not possible with GitLab CE, is a paid feature)
