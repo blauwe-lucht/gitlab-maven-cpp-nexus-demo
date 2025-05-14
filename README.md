@@ -15,19 +15,24 @@ Note: I only got this to work with maven-releases. I could not use a nar file fr
 - Doing building, testing and deploying from a GitLab pipeline.
 - Showing Google Test output in the Tests tab of a GitLab pipeline.
 - How to prevent Maven from always downloading all its dependencies on every build.
+- Automatic deployment to the test environment, manual deployment to the acceptance environment.
 
 ## Prerequisites
 
 - add ```127.0.0.1 gitlab.local``` to your local /etc/hosts file
 - nothing should be listening on ports 8080, and 8081
+- you should be running Linux with Docker installed
 
 ## Usage
 
-- ```docker compose up -d```
-- ```./build-ci-image.sh```
-- ```./configure-nexus.sh```
-- ```./configure-gitlab.sh```
-- ```./register-runner.sh```
+- ```./setup.sh```
+
+This will create a _gitlab_push directory containing Git clones of the library and application code that
+are connected to this demo's GitLab server.
+When you make changes to the code there and push them, the respective GitLab pipeline will trigger.
+
+Note that we're using Nexus maven-releases repository, this means that the library version should be bumped
+on every build, see the pom.xml. Or alternatively remove the component from Nexus before pushing changes.
 
 Log in to GitLab:
 
@@ -41,7 +46,6 @@ Log in to Nexus:
 
 ## TODO
 
-- Make a setup script that executes all required steps.
 - Don't use registration token, but the new OAuth token.
 - Try to get maven-snapshots to work.
 - Only allow specific users to deploy to acceptance. (this is currently not possible with GitLab CE, is a paid feature)
