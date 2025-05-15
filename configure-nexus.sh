@@ -67,9 +67,9 @@ change_admin_password() {
 
     log_info "Attempting to change admin password using guessed password"
     if curl -s -f -u "admin:${preseeded_password}" \
-        -H "Content-Type: application/json" \
+        -H "Content-Type: text/plain" \
         -X PUT \
-        -d "{\"password\": \"${NEXUS_ADMIN_PASSWORD}\"}" \
+        -d "${NEXUS_ADMIN_PASSWORD}" \
         "${NEXUS_URL}/service/rest/v1/security/users/admin/change-password" >/dev/null; then
 
         log_info "Password changed successfully"
