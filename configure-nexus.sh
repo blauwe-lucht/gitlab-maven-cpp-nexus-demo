@@ -45,10 +45,6 @@ call_nexus_api() {
     curl "${curl_args[@]}" "${NEXUS_URL}${endpoint}"
 }
 
-get_preseeded_admin_password() {
-    docker exec nexus sh -c 'cat /nexus-data/admin.password 2>/dev/null || true'
-}
-
 is_password_valid() {
     call_nexus_api GET "/service/rest/v1/status" >/dev/null 2>&1
 }
