@@ -46,6 +46,7 @@ Log in to Nexus:
 
 ## TODO
 
+- Fix setup.sh not working on clean start.
 - Don't use registration token, but the new OAuth token.
-- Try to get maven-snapshots to work.
 - Only allow specific users to deploy to acceptance. (this is currently not possible with GitLab CE, is a paid feature)
+- Add GitLab projects to group.
