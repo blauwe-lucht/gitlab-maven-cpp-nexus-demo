@@ -6,8 +6,7 @@ int Fibonacci::compute(int n) {
         throw std::invalid_argument("Negative input not allowed");
     }
 
-    if (n <= 1)
-    {
+    if (n <= 1) {
         return n;
     }
     
