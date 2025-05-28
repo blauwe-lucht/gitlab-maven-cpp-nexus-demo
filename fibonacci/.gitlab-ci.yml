@@ -28,6 +28,7 @@ deploy_to_test:
   only:
     - main
   script:
+    - mvn --batch-mode help:evaluate -Dexpression=project.version -q -DforceStdout
     - python3 deploy-to.py test
 
 deploy_to_acceptance:
